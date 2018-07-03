@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -eu
+BASENAME=$(basename $1 .md)
+
+pandoc ${BASENAME}.md --variable mainfont="EB Garamond" --latex-engine=xelatex -o ${BASENAME}.pdf
