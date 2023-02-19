@@ -1,5 +1,23 @@
 #!/bin/bash
 
+# md2pdf
+#
+# Take a markdown file and output a nice PDF of it
+#
+# This tool is capable of being used as a UNIX-style pipe.
+#
+# Usage:
+#
+#   md2pdf foo.md
+#
+# or
+#
+#   md2pdf < foo.md > foo.pdf
+#
+# or
+#
+#   md2pdf foo # deprecated - should use full filename
+
 set -eu
 
 TMPINPUT=$(tempfile --suffix=.md)
