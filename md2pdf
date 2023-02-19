@@ -1,6 +1,72 @@
 #!/bin/bash
 
 set -eu
-BASENAME=$(basename $1 .md)
 
-pandoc ${BASENAME}.md --variable mainfont="EB Garamond" --latex-engine=xelatex -o ${BASENAME}.pdf
+TMPINPUT=$(tempfile --suffix=.md)
+cat > $TMPINPUT <<EOF
+---
+urlcolor: blue
+colorlinks: true
+---
+EOF
+
+maincleanup () {
+  local ev=$?
+  rm -f -- $TMPINPUT
+  exit $ev
+}
+
+trap maincleanup EXIT
+
+has_suffix () {
+  # Does the filename name have the right suffix?
+  # e.g., "has_suffic main.c .c" returns true
+  [ $(basename "$1" "$2") != "$1" ]
+}
+
+source_file_name () {
+  local filename="$1"
+  local incomplete_filename="${filename}md"
+
+  if ! has_suffix "$filename" "."; then
+    basename $1 .md
+  elif [ -f "$incomplete_filename" ]; then
+    basename $1 .
+  else
+    echo "Invalid filename: missing suffix?" >&2
+    exit 2
+  fi
+}
+
+# We have to handle things very differently when we're being used on stdin,
+# as pandoc is not UNIX-friendly, i.e. it is sensitive about filenames
+if [ $# = 0 ]; then
+  # Use stdin
+  OUTPUT=$(tempfile --suffix=.pdf)
+  INPUT="/dev/stdin"
+
+  cleanup () {
+    local ev=$?
+    rm -f -- $OUTPUT $TMPINPUT
+    exit $ev
+  }
+
+  trap cleanup EXIT
+else
+  BASENAME=$(source_file_name "$1")
+  INPUT=${BASENAME}.md
+  OUTPUT=${BASENAME}.pdf
+fi
+
+
+cat "$INPUT" >> $TMPINPUT
+
+pandoc -s "$TMPINPUT" \
+  --pdf-engine=pdflatex \
+  --variable fontfamily=mathpazo \
+  --variable fontfamilyoptions=osf,sc \
+  -o "$OUTPUT"
+
+if [ $# = 0 ]; then
+  cat $OUTPUT
+fi
