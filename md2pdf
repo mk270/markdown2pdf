@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # md2pdf
+#   by Martin Keegan, (c) 2018
 #
 # Take a markdown file and output a nice PDF of it
 #
@@ -17,6 +18,9 @@
 # or
 #
 #   md2pdf foo # deprecated - should use full filename
+#
+# To the extent, if any, to which this is protected by copyright, this
+# software is available under the Apache Software Licence v2.0
 
 set -eu
 
