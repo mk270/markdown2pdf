@@ -43,7 +43,7 @@ trap maincleanup EXIT
 has_suffix () {
   # Does the filename name have the right suffix?
   # e.g., "has_suffic main.c .c" returns true
-  [ $(basename "$1" "$2") != "$1" ]
+  [ $(basename "$1" "$2") != $(basename "$1") ]
 }
 
 source_file_name () {
@@ -75,7 +75,7 @@ if [ $# = 0 ]; then
 
   trap cleanup EXIT
 else
-  BASENAME=$(source_file_name "$1")
+  BASENAME=$(dirname "$1")/$(source_file_name "$1")
   INPUT=${BASENAME}.md
   OUTPUT=${BASENAME}.pdf
 fi
