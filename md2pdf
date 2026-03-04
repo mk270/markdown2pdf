@@ -24,17 +24,37 @@
 
 set -eu
 
-TMPINPUT=$(tempfile --suffix=.md)
+
+# Set up headers
+
+TMPINPUT=$(mktemp --suffix=.md)
 cat > $TMPINPUT <<EOF
 ---
 urlcolor: blue
 colorlinks: true
+pdfcreator: ""
+pdfproducer: ""
 ---
 EOF
 
+TMPHEADER=$(mktemp --suffix=.tex)
+cat > $TMPHEADER <<EOF
+\AtBeginDocument{
+  \hypersetup{
+    pdfcreator={},
+    pdfproducer={}
+  }
+}
+
+EOF
+
+TMPPDF=$(mktemp --suffix=.pdf)
+
+# Register cleanup for headers
+
 maincleanup () {
   local ev=$?
-  rm -f -- $TMPINPUT
+  rm -f -- $TMPINPUT $TMPHEADER $TMPPDF
   exit $ev
 }
 
@@ -64,7 +84,7 @@ source_file_name () {
 # as pandoc is not UNIX-friendly, i.e. it is sensitive about filenames
 if [ $# = 0 ]; then
   # Use stdin
-  OUTPUT=$(tempfile --suffix=.pdf)
+  OUTPUT=$(mktemp --suffix=.pdf)
   INPUT="/dev/stdin"
 
   cleanup () {
@@ -83,11 +103,21 @@ fi
 
 cat "$INPUT" >> $TMPINPUT
 
+SOURCE_DATE_EPOCH=0 \
 pandoc -s "$TMPINPUT" \
   --pdf-engine=pdflatex \
   --variable fontfamily=mathpazo \
   --variable fontfamilyoptions=osf,sc \
-  -o "$OUTPUT"
+  --metadata title="" \
+  --metadata author="" \
+  --metadata subject="" \
+  --metadata keywords="" \
+  -o "$TMPPDF" \
+  -V "pdfcreator=" \
+  -V "pdfproducer=" \
+  -H "$TMPHEADER"
+
+strip_pdf "$TMPPDF" "$OUTPUT"
 
 if [ $# = 0 ]; then
   cat $OUTPUT
