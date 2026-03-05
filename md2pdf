@@ -121,7 +121,7 @@ pandoc -s "$TMPINPUT" \
   -V "pdfproducer=" \
   -H "$TMPHEADER"
 
-strip_pdf "$TMPPDF" "$OUTPUT"
+strip-pdf "$TMPPDF" "$OUTPUT"
 
 if [ $# = 0 ]; then
   cat $OUTPUT
