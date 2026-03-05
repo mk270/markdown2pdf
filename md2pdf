@@ -100,14 +100,18 @@ else
   OUTPUT=${BASENAME}.pdf
 fi
 
+# set up fonts
+FONTFAMILY=mathpazo
+FONTOPTIONS=osf,sc
 
+# get started ...
 cat "$INPUT" >> $TMPINPUT
 
 SOURCE_DATE_EPOCH=0 \
 pandoc -s "$TMPINPUT" \
   --pdf-engine=pdflatex \
-  --variable fontfamily=mathpazo \
-  --variable fontfamilyoptions=osf,sc \
+  --variable fontfamily="$FONTFAMILY" \
+  --variable fontfamilyoptions="$FONTOPTIONS" \
   --metadata title="" \
   --metadata author="" \
   --metadata subject="" \
