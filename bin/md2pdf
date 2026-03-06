@@ -19,6 +19,11 @@
 #
 #   md2pdf foo # deprecated - should use full filename
 #
+#
+# Optionally, one may specify the `--sans' argument, to use a sans-serif
+# font.
+#
+#
 # To the extent, if any, to which this is protected by copyright, this
 # software is available under the Apache Software Licence v2.0
 
@@ -80,6 +85,21 @@ source_file_name () {
   fi
 }
 
+
+# set up fonts
+FONTFAMILY=mathpazo
+FONTOPTIONS=osf,sc
+if [ ${1:-} = "--sans" ]; then
+  FONTFAMILY=helvet
+  FONTOPTIONS=scaled
+  echo '\renewcommand{\familydefault}{\sfdefault}' >> "$TMPHEADER"
+  shift
+fi
+
+echo FF: $FONTFAMILY >&2
+echo FO: $FONTOPTIONS >&2
+cat $TMPHEADER >&2
+
 # We have to handle things very differently when we're being used on stdin,
 # as pandoc is not UNIX-friendly, i.e. it is sensitive about filenames
 if [ $# = 0 ]; then
@@ -99,10 +119,6 @@ else
   INPUT=${BASENAME}.md
   OUTPUT=${BASENAME}.pdf
 fi
-
-# set up fonts
-FONTFAMILY=mathpazo
-FONTOPTIONS=osf,sc
 
 # get started ...
 cat "$INPUT" >> $TMPINPUT
